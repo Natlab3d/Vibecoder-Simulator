@@ -80,12 +80,13 @@ function runDetail(p: RunPreview, noun: string) {
 
 function ProjectPanel({ g, act, p }: { g: GameState; act: Act; p: Project }) {
   const [model, setModel] = useState<ModelId>('core');
+  const [fixModel, setFixModel] = useState<ModelId>('core');
   const [batch, setBatch] = useState<BatchId>('medium');
   const client = CLIENTS[p.clientId];
   const left = p.deadlineAt - g.minute;
   const remaining = p.tasksTotal - p.tasksDone - p.tasksInFlight;
   const build = previewBuild(g, p, model, batch);
-  const fix = previewFix(g, p, model);
+  const fix = previewFix(g, p, fixModel);
   const test = testBlock(g, p);
   const delivery = deliverBlock(p);
   const quality = expectedQuality(p);
@@ -179,21 +180,32 @@ function ProjectPanel({ g, act, p }: { g: GameState; act: Act; p: Project }) {
         )}
 
         {fixableBugs > 0 && (
-          <Section title="Fix known bugs">
+          <Section title="Fix known bugs" note="Pick an AI model to squash bugs, or fix them yourself by hand.">
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {(Object.keys(MODELS) as ModelId[]).map((id) => (
+                <Chip
+                  key={id}
+                  active={fixModel === id}
+                  onClick={() => setFixModel(id)}
+                  label={MODELS[id].label}
+                  detail={`Fix rate ${(MODELS[id].fixRate * 100).toFixed(0)}% · ${(MODELS[id].regress * 100).toFixed(0)}% regress`}
+                />
+              ))}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <ActionButton
-                label={`Agent fixes ${count(fix.amount, 'bug')} (${MODELS[model].label})`}
+                label={`Agent fixes ${count(fix.amount, 'bug')} (${MODELS[fixModel].label})`}
                 detail={`${duration(fix.humanMinutes)} prompt + ${duration(fix.aiMinutes)} agent · ${tokens(fix.tokens)} tokens`}
                 tone="primary"
                 disabled={!fix.ok}
                 reason={fix.ok || fix.shortBy > 0 || g.human ? null : fix.reason}
-                onClick={() => act((x) => startFix(x, p.id, model))}
+                onClick={() => act((x) => startFix(x, p.id, fixModel))}
               />
               <ActionButton label="Fix one by hand" detail={`${duration(handMinutes(g, 1) * 0.75)} of your time, no tokens`} disabled={!!g.human} onClick={() => act((x) => startHandfix(x, p.id))} />
             </div>
             {fix.shortBy > 0 && (
               <div className="mt-1.5">
-                <ShortOfTokens g={g} act={act} preview={fix} model={model} />
+                <ShortOfTokens g={g} act={act} preview={fix} model={fixModel} />
               </div>
             )}
           </Section>
