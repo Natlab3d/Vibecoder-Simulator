@@ -25,7 +25,7 @@ export const ClientsTab: React.FC<{ g: GameState }> = ({ g }) => {
             <Stars value={r} /> <span className="font-mono text-amber-300">{r > 0 ? r.toFixed(1) : '—'}</span>
           </div>
           <div className="text-sm font-mono text-zinc-400">
-            fees {starFeeDelta >= 0 ? '+' : ''}{starFeeDelta}%{salaryDelta !== 0 ? ` (${salaryDelta}% diff)` : ''} · {g.reputation} reputation
+            fees {starFeeDelta >= 0 ? '+' : ''}{starFeeDelta}%{salaryDelta !== 0 ? ` (${salaryDelta}% career)` : ''} · {g.reputation} reputation
           </div>
         </div>
       </div>
