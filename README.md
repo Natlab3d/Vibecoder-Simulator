@@ -2,7 +2,7 @@
 
 A 3D first-person freelance simulator. You are a solo prompt engineer with one AI agent, a strict token quota, and weekly rent to pay.
 
-**[Play Online](https://natlab3d.github.io/vibecoder-simulator/)**
+**[Play Online](https://natlab3d.github.io/Vibecoder-Simulator/)**
 
 ---
 
@@ -53,8 +53,8 @@ Requires [Node.js](https://nodejs.org/) (v18+).
 
 ```bash
 # Clone the repository
-git clone https://github.com/Natlab3d/vibecoder-simulator.git
-cd vibecoder-simulator
+git clone https://github.com/Natlab3d/Vibecoder-Simulator.git
+cd Vibecoder-Simulator
 
 # Install dependencies
 npm install
