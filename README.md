@@ -69,3 +69,19 @@ To rebuild the single-file offline bundle:
 ```bash
 npm run build:single
 ```
+
+---
+
+## Feedback & Feature Suggestions
+
+Have an idea for a new career, AI model, client personality, or apartment upgrade?
+Feel free to [Open a Feature Suggestion](https://github.com/Natlab3d/Vibecoder-Simulator/issues) — community ideas are always welcome!
+
+---
+
+## Support the Project
+
+If you enjoyed playing Vibecoder Simulator and want to support ongoing updates:
+
+[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-Support_Development-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/natlab3d)
+

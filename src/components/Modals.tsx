@@ -38,6 +38,25 @@ VIBE<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text tex
           How it works
         </button>
       </div>
+      <div className="flex flex-wrap items-center gap-3 mt-5 text-xs text-zinc-500">
+        <a
+          href="https://github.com/Natlab3d/Vibecoder-Simulator/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-cyan-400 transition-colors"
+        >
+          Suggest a feature
+        </a>
+        <span>·</span>
+        <a
+          href="https://ko-fi.com/natlab3d"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-rose-400 transition-colors"
+        >
+          Support on Ko-fi
+        </a>
+      </div>
     </div>
   </div>
 );
@@ -141,6 +160,24 @@ export const HelpModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
         <strong className="text-white">Money & Career</strong>: every Monday clients pay for delivered jobs and weekly bills are charged. Unlock higher contract tiers by earning reputation and completing Academy courses. Debt above {money(OVERDRAFT_LIMIT)} at month end means bankruptcy.
       </p>
       <p className="font-mono text-sm text-zinc-400">WASD walk · mouse drag look · E interact · Tab or Space laptop · 1 2 3 speed</p>
+      <div className="pt-2 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-500">
+        <a
+          href="https://github.com/Natlab3d/Vibecoder-Simulator/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-cyan-400 transition-colors"
+        >
+          Suggest a feature
+        </a>
+        <a
+          href="https://ko-fi.com/natlab3d"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-rose-400 transition-colors"
+        >
+          Support on Ko-fi
+        </a>
+      </div>
     </div>
     <button onClick={onClose} className="mt-4 w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg">
       Got it
