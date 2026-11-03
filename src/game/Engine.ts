@@ -490,6 +490,7 @@ const canUseAi = (g: GameState, tokens: number) => g.outageUntil === null && tok
 export function specPlan(g: GameState, p: Project, handOnly = false) {
   const tasks = Math.ceil(p.tasksTotal * 0.35);
   const tokens = Math.round(tasks * TIER_INFO[p.tier].tokensPerTask * 0.15 * tokenMultiplier(g) * 10) / 10;
+  const status = tokenStatus(g);
   const ai = !handOnly && canUseAi(g, tokens);
   return {
     ai,
@@ -498,6 +499,7 @@ export function specPlan(g: GameState, p: Project, handOnly = false) {
     aiTokens: tokens,
     aiMinutes: 30,
     handMinutes: HOUR,
+    shortBy: Math.max(0, tokens - status.usable),
   };
 }
 
@@ -516,6 +518,7 @@ export function startPlan(g: GameState, projectId: string, handOnly = false): Ac
 
 export function testPlan(g: GameState, p: Project, handOnly = false) {
   const tokens = Math.round(p.tasksDone * TIER_INFO[p.tier].tokensPerTask * 0.03 * tokenMultiplier(g) * 10) / 10;
+  const status = tokenStatus(g);
   const ai = !handOnly && canUseAi(g, tokens);
   const base = Math.max(30, p.tasksDone * 5) * (has(g, 'monitor') ? 0.75 : 1) * (has(g, 'workstation') ? 0.75 : 1);
   return {
@@ -525,6 +528,7 @@ export function testPlan(g: GameState, p: Project, handOnly = false) {
     aiTokens: tokens,
     aiMinutes: ceilStep(base),
     handMinutes: ceilStep(base * 1.5),
+    shortBy: Math.max(0, tokens - status.usable),
   };
 }
 

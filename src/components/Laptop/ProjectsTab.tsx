@@ -204,6 +204,11 @@ function ProjectPanel({ g, act, p }: { g: GameState; act: Act; p: Project }) {
                 onClick={() => act((x) => startPlan(x, p.id, true))}
               />
             </div>
+            {spec.shortBy > 0 && (
+              <div className="mt-1.5">
+                <ShortOfTokens g={g} act={act} preview={{ shortBy: spec.shortBy, ok: false } as any} />
+              </div>
+            )}
           </Section>
         )}
 
@@ -225,6 +230,11 @@ function ProjectPanel({ g, act, p }: { g: GameState; act: Act; p: Project }) {
                 onClick={() => act((x) => startTest(x, p.id, true))}
               />
             </div>
+            {testing.shortBy > 0 && (
+              <div className="mt-1.5">
+                <ShortOfTokens g={g} act={act} preview={{ shortBy: testing.shortBy, ok: false } as any} />
+              </div>
+            )}
           </Section>
         )}
 
