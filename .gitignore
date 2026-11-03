@@ -1,0 +1,17 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+*.bak
+*.zip
+.claude/
+.env*
+!.env.example
+
+# Internal development notes (local only)
+WORK-LOG.md
+TRAPS.md
+dev.log
+
