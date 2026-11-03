@@ -39,8 +39,8 @@ export const BATCHES: Record<BatchId, { label: string; blurb: string; hours: num
 export const PLANS: Record<PlanId, { label: string; price: number; session: number; weekly: number; agents: number; blurb: string }> = {
   free: { label: 'Free', price: 0, session: 20, weekly: 80, agents: 1, blurb: 'Enough to learn on.' },
   pro: { label: 'Pro', price: 30, session: 50, weekly: 250, agents: 1, blurb: 'A working freelancer.' },
-  max: { label: 'Max', price: 110, session: 120, weekly: 700, agents: 2, blurb: 'Run two agents at once.' },
-  ultra: { label: 'Ultra', price: 375, session: 350, weekly: 2000, agents: 3, blurb: 'Three agents, huge quotas.' },
+  max: { label: 'Max', price: 110, session: 250, weekly: 1200, agents: 2, blurb: 'Run two agents at once.' },
+  ultra: { label: 'Ultra', price: 375, session: 600, weekly: 3500, agents: 3, blurb: 'Three agents, huge quotas.' },
 };
 
 export const CREDIT_PACK = { tokens: 25, price: 50 };

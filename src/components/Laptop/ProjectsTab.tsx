@@ -152,7 +152,7 @@ function ProjectPanel({ g, act, p }: { g: GameState; act: Act; p: Project }) {
 
       <div className="md:col-span-3 space-y-3 order-1 md:order-none">
         {remaining > 0 && (
-          <Section title="Direct the agent" note="It works in the background, even while you sleep. One run lasts a few hours, then it needs you again.">
+          <Section title="Build tasks" note="Direct your AI agent to build tasks, or hand-code them yourself.">
             <div className="flex flex-wrap gap-1.5 mb-1.5">
               {(Object.keys(MODELS) as ModelId[]).map((id) => (
                 <Chip key={id} active={model === id} onClick={() => setModel(id)} label={MODELS[id].label} detail={MODELS[id].blurb} />
@@ -163,19 +163,68 @@ function ProjectPanel({ g, act, p }: { g: GameState; act: Act; p: Project }) {
                 <Chip key={id} active={batch === id} onClick={() => setBatch(id)} label={BATCHES[id].label} detail={BATCHES[id].blurb} />
               ))}
             </div>
-            <ActionButton
-              label={`Run agent: build ${count(build.amount, 'task')}`}
-              detail={runDetail(build, 'tasks')}
-              tone="primary"
-              disabled={!build.ok}
-              reason={build.ok || build.shortBy > 0 || g.human ? null : build.reason}
-              onClick={() => act((x) => startBuild(x, p.id, model, batch))}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <ActionButton
+                label={`Run agent: build ${count(build.amount, 'task')}`}
+                detail={runDetail(build, 'tasks')}
+                tone="primary"
+                disabled={!build.ok}
+                reason={build.ok || build.shortBy > 0 || g.human ? null : build.reason}
+                onClick={() => act((x) => startBuild(x, p.id, model, batch))}
+              />
+              <ActionButton
+                label={`Hand-code ${count(hand, 'task')}`}
+                detail={`${duration(handMinutes(g, hand))}, no tokens, tiring`}
+                disabled={!!g.human || hand <= 0}
+                onClick={() => act((x) => startHandcode(x, p.id))}
+              />
+            </div>
             {build.shortBy > 0 && (
               <div className="mt-1.5">
                 <ShortOfTokens g={g} act={act} preview={build} model={model} batch={batch} />
               </div>
             )}
+          </Section>
+        )}
+
+        {remaining > p.specTasks && (
+          <Section title="Plan & Specification" note="Covered tasks have 40% fewer bugs and use 15% fewer tokens.">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <ActionButton
+                label="Agent drafts plan"
+                detail={`${duration(spec.aiMinutes)}, ${tokens(spec.aiTokens)} tokens`}
+                disabled={!!g.human || !spec.ai}
+                reason={g.human ? null : spec.ai ? null : 'Not enough tokens'}
+                onClick={() => act((x) => startPlan(x, p.id, false))}
+              />
+              <ActionButton
+                label="Write plan by hand"
+                detail={`${duration(spec.handMinutes)}, no tokens`}
+                disabled={!!g.human}
+                onClick={() => act((x) => startPlan(x, p.id, true))}
+              />
+            </div>
+          </Section>
+        )}
+
+        {p.tasksDone > 0 && (
+          <Section title="Test & Quality Review" note="Find hidden bugs before client delivery. Testing by hand costs 0 tokens.">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <ActionButton
+                label="Agent test & review"
+                detail={`${duration(testing.aiMinutes)}, ${tokens(testing.aiTokens)} tokens. Finds most hidden bugs`}
+                disabled={!testing.ai || !!test}
+                reason={g.human ? null : test ?? (testing.ai ? null : 'Not enough tokens for AI test')}
+                onClick={() => act((x) => startTest(x, p.id, false))}
+              />
+              <ActionButton
+                label="Test & review by hand"
+                detail={`${duration(testing.handMinutes)}, no tokens. Slower, finds fewer bugs`}
+                disabled={!!test}
+                reason={g.human ? null : test}
+                onClick={() => act((x) => startTest(x, p.id, true))}
+              />
+            </div>
           </Section>
         )}
 
@@ -201,7 +250,12 @@ function ProjectPanel({ g, act, p }: { g: GameState; act: Act; p: Project }) {
                 reason={fix.ok || fix.shortBy > 0 || g.human ? null : fix.reason}
                 onClick={() => act((x) => startFix(x, p.id, fixModel))}
               />
-              <ActionButton label="Fix one by hand" detail={`${duration(handMinutes(g, 1) * 0.75)} of your time, no tokens`} disabled={!!g.human} onClick={() => act((x) => startHandfix(x, p.id))} />
+              <ActionButton
+                label="Fix one by hand"
+                detail={`${duration(handMinutes(g, 1) * 0.75)} of your time, no tokens`}
+                disabled={!!g.human}
+                onClick={() => act((x) => startHandfix(x, p.id))}
+              />
             </div>
             {fix.shortBy > 0 && (
               <div className="mt-1.5">
@@ -210,26 +264,6 @@ function ProjectPanel({ g, act, p }: { g: GameState; act: Act; p: Project }) {
             )}
           </Section>
         )}
-
-        <Section title="Do it yourself">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <ActionButton
-              label={spec.ai ? 'Write the plan' : 'Write the plan by hand'}
-              detail={`${duration(spec.minutes)}, ${spec.ai ? `${tokens(spec.tokens)} tokens` : 'no tokens'}. Covered tasks: 40% fewer bugs, 15% fewer tokens`}
-              disabled={!!g.human || remaining <= p.specTasks}
-              onClick={() => act((x) => startPlan(x, p.id))}
-            />
-            <ActionButton label={testing.ai ? 'Test and review' : 'Test and review by hand'} detail={testing.ai ? `${duration(testing.minutes)}, ${tokens(testing.tokens)} tokens. Finds most hidden bugs` : `${duration(testing.minutes)}, no tokens. Slower, finds fewer bugs`} disabled={!!test} reason={g.human ? null : test} onClick={() => act((x) => startTest(x, p.id))} />
-            {hand > 0 && (
-              <ActionButton
-                label={`Hand-code ${count(hand, 'task')}`}
-                detail={`${duration(handMinutes(g, hand))}, no tokens, tiring`}
-                disabled={!!g.human}
-                onClick={() => act((x) => startHandcode(x, p.id))}
-              />
-            )}
-          </div>
-        </Section>
 
         <ActionButton
           label="Deliver to client"

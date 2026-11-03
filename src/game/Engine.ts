@@ -487,31 +487,45 @@ function workBlock(g: GameState): string | null {
 // Spec and test use AI when tokens and internet allow, otherwise they fall back to doing it by hand
 const canUseAi = (g: GameState, tokens: number) => g.outageUntil === null && tokenStatus(g).usable >= tokens;
 
-export function specPlan(g: GameState, p: Project) {
+export function specPlan(g: GameState, p: Project, handOnly = false) {
   const tasks = Math.ceil(p.tasksTotal * 0.35);
   const tokens = Math.round(tasks * TIER_INFO[p.tier].tokensPerTask * 0.15 * tokenMultiplier(g) * 10) / 10;
-  const ai = canUseAi(g, tokens);
-  return { ai, tokens: ai ? tokens : 0, minutes: ai ? 30 : HOUR };
+  const ai = !handOnly && canUseAi(g, tokens);
+  return {
+    ai,
+    tokens: ai ? tokens : 0,
+    minutes: ai ? 30 : HOUR,
+    aiTokens: tokens,
+    aiMinutes: 30,
+    handMinutes: HOUR,
+  };
 }
 
-export function startPlan(g: GameState, projectId: string): ActionResult {
+export function startPlan(g: GameState, projectId: string, handOnly = false): ActionResult {
   const p = projectById(g, projectId);
   if (!p) return { ok: false, reason: 'Unknown project.' };
   const blocked = workBlock(g);
   if (blocked) return { ok: false, reason: blocked };
   const remaining = p.tasksTotal - p.tasksDone - p.tasksInFlight;
   if (p.specTasks >= remaining) return { ok: false, reason: 'The plan already covers everything left to build.' };
-  const plan = specPlan(g, p);
+  const plan = specPlan(g, p, handOnly);
   if (plan.ai) spendTokens(g, plan.tokens);
   startHuman(g, 'plan', plan.minutes, `Writing a plan for ${p.title}`, { projectId: p.id, hand: !plan.ai });
   return { ok: true };
 }
 
-export function testPlan(g: GameState, p: Project) {
-  const tokens = Math.round(p.tasksDone * TIER_INFO[p.tier].tokensPerTask * 0.1 * tokenMultiplier(g) * 10) / 10;
-  const ai = canUseAi(g, tokens);
+export function testPlan(g: GameState, p: Project, handOnly = false) {
+  const tokens = Math.round(p.tasksDone * TIER_INFO[p.tier].tokensPerTask * 0.03 * tokenMultiplier(g) * 10) / 10;
+  const ai = !handOnly && canUseAi(g, tokens);
   const base = Math.max(30, p.tasksDone * 5) * (has(g, 'monitor') ? 0.75 : 1) * (has(g, 'workstation') ? 0.75 : 1);
-  return { ai, tokens: ai ? tokens : 0, minutes: ceilStep(base * (ai ? 1 : 1.5)) };
+  return {
+    ai,
+    tokens: ai ? tokens : 0,
+    minutes: ceilStep(base * (ai ? 1 : 1.5)),
+    aiTokens: tokens,
+    aiMinutes: ceilStep(base),
+    handMinutes: ceilStep(base * 1.5),
+  };
 }
 
 export function testBlock(g: GameState, p: Project): string | null {
@@ -520,12 +534,12 @@ export function testBlock(g: GameState, p: Project): string | null {
   return workBlock(g);
 }
 
-export function startTest(g: GameState, projectId: string): ActionResult {
+export function startTest(g: GameState, projectId: string, handOnly = false): ActionResult {
   const p = projectById(g, projectId);
   if (!p) return { ok: false, reason: 'Unknown project.' };
   const blocked = testBlock(g, p);
   if (blocked) return { ok: false, reason: blocked };
-  const plan = testPlan(g, p);
+  const plan = testPlan(g, p, handOnly);
   if (plan.ai) spendTokens(g, plan.tokens);
   startHuman(g, 'test', plan.minutes, `Testing ${p.title}`, { projectId: p.id, hand: !plan.ai });
   return { ok: true };
