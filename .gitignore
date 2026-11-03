@@ -13,5 +13,6 @@ coverage/
 # Internal development notes (local only)
 WORK-LOG.md
 TRAPS.md
+DEVELOPMENT.md
 dev.log
 
