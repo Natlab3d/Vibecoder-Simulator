@@ -885,16 +885,39 @@ function maybeOfferRetainer(g: GameState, p: Project, stars: number) {
   }
 }
 
-// A stalled run has no usable token budget to make progress. Cancelling it
-// releases its project reservation; cancelled fix runs return their bugs too.
+// A stalled run has no usable token budget to make progress. When cancelled or
+// replaced by manual hand-coding, bank any partial work completed so far.
 function removeStalledRun(g: GameState, run: AgentRun) {
   const p = projectById(g, run.projectId);
   if (p) {
+    const total = run.minutesTotal;
+    const left = run.minutesLeft;
+    const progress = total > 0 ? Math.max(0, Math.min(1, (total - left) / total)) : 0;
     if (run.type === 'build') {
-      p.tasksInFlight = Math.max(0, p.tasksInFlight - run.amount);
+      const completed = Math.floor(run.amount * progress);
+      if (completed > 0) {
+        p.tasksDone += completed;
+        p.tasksInFlight = Math.max(0, p.tasksInFlight - completed);
+        const bugs = binomial(g, completed, run.bugRate);
+        p.hiddenBugs += bugs;
+        p.estHidden += completed * run.bugRate;
+        p.testedSinceChange = false;
+        g.tally.bugsMade += bugs;
+        log(g, `Banked ${completed} of ${count(run.amount, 'task')} completed by agent before stalling.`, 'info');
+      }
+      p.tasksInFlight = Math.max(0, p.tasksInFlight - (run.amount - completed));
     } else {
+      const model = MODELS[run.model];
+      const fixed = Math.floor(run.amount * progress * model.fixRate);
+      if (fixed > 0) {
+        const regress = binomial(g, fixed, model.regress);
+        p.hiddenBugs += regress;
+        p.estHidden += fixed * model.regress;
+        p.testedSinceChange = false;
+        log(g, `Banked ${fixed} bug fixes completed by agent before stalling.`, 'info');
+      }
       p.fixing = Math.max(0, p.fixing - run.amount);
-      p.knownBugs += run.amount;
+      p.knownBugs += Math.max(0, run.amount - fixed);
     }
   }
   g.agents = g.agents.filter((agent) => agent.id !== run.id);
@@ -1139,9 +1162,27 @@ function abortHuman(g: GameState) {
   if (!h) return;
   const p = projectById(g, h.projectId);
   if (h.kind === 'prompt' && h.run) g.agents.push(h.run);
-  if (h.kind === 'handcode' && p) p.tasksInFlight -= h.amount ?? 0;
+  if (h.kind === 'handcode' && p) {
+    const total = h.minutesTotal;
+    const left = h.minutesLeft;
+    const progress = total > 0 ? Math.max(0, Math.min(1, (total - left) / total)) : 0;
+    const amount = h.amount ?? 0;
+    const completed = Math.floor(amount * progress);
+    if (completed > 0) {
+      p.tasksDone += completed;
+      p.tasksInFlight = Math.max(0, p.tasksInFlight - completed);
+      const rate = clamp(HAND_BUG_RATE * (g.background === 'marketer' ? 1.6 : 1) * tiredBugs(g) * p.approach.bugs, 0.01, 0.9);
+      const bugs = binomial(g, completed, rate);
+      p.hiddenBugs += bugs;
+      p.estHidden += completed * rate;
+      p.testedSinceChange = false;
+      g.tally.bugsMade += bugs;
+      log(g, `Banked ${completed} of ${count(amount, 'task')} finished by hand before stopping.`, 'info');
+    }
+    p.tasksInFlight = Math.max(0, p.tasksInFlight - (amount - completed));
+  }
   if (h.kind === 'handfix' && p) {
-    p.fixing -= 1;
+    p.fixing = Math.max(0, p.fixing - 1);
     p.knownBugs += 1;
   }
   g.human = null;

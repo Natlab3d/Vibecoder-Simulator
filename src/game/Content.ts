@@ -5,29 +5,29 @@ export const BACKGROUNDS: Record<BackgroundId, { label: string; blurb: string; p
     label: 'Laid-off developer',
     blurb: 'Ten years of real code, one surprise layoff. You trust your hands more than the model.',
     perks: ['Hand-coding is 30% faster', 'Tests find more bugs', 'Standard contract pay (Easy)'],
-    cash: 0,
+    cash: 50,
     rent: 225,
   },
   marketer: {
     label: 'Marketer turned prompter',
     blurb: 'You never learned to code, but you can talk a model into anything.',
     perks: ['1st token pack each week is half price ($25)', 'Client pay -10% (Medium)', 'Hand-coding is slower & buggier · Courses take 20% longer'],
-    cash: 0,
+    cash: 50,
     rent: 225,
   },
   student: {
     label: 'Broke student',
     blurb: 'A shared flat, instant noodles, and a lot of free evenings to learn.',
     perks: ['Courses take 15% less time', 'Client pay -15% (Hard)', 'AI runs are 25% slower and use 20% more tokens'],
-    cash: 0,
+    cash: 50,
     rent: 225,
   },
 };
 
 export const MODELS: Record<ModelId, { label: string; blurb: string; tokens: number; time: number; bugs: number; fixRate: number; regress: number }> = {
-  spark: { label: 'Spark', blurb: 'Cheap and fast, sloppy', tokens: 0.4, time: 0.6, bugs: 1.7, fixRate: 0.65, regress: 0.25 },
-  core: { label: 'Core', blurb: 'The balanced default', tokens: 1, time: 1, bugs: 1, fixRate: 0.85, regress: 0.1 },
-  apex: { label: 'Apex', blurb: 'Careful, slow, expensive', tokens: 2.5, time: 1.5, bugs: 0.45, fixRate: 0.97, regress: 0.03 },
+  spark: { label: 'Spark', blurb: 'Cheap and fast, sloppy', tokens: 0.4, time: 0.6, bugs: 1.7, fixRate: 0.85, regress: 0.08 },
+  core: { label: 'Core', blurb: 'The balanced default', tokens: 1, time: 1, bugs: 1, fixRate: 0.95, regress: 0.03 },
+  apex: { label: 'Apex', blurb: 'Careful, slow, expensive', tokens: 2.5, time: 1.5, bugs: 0.45, fixRate: 0.99, regress: 0.01 },
 };
 
 export const BATCHES: Record<BatchId, { label: string; blurb: string; hours: number; bugs: number }> = {
